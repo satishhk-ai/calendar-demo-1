@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Debug Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .debug-panel {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>Calendar Debug Test</h1>
+    
+    <div class="debug-panel">
+        <h3>Debug Information</h3>
+        <div id="debug-info">Loading...</div>
+    </div>
+    
+    <div class="debug-panel">
+        <h3>Calendar App</h3>
+        <div id="calendar-container">
+            <!-- Calendar will be loaded here -->
+        </div>
+    </div>
+
+    <script>
+        function loadCalendar() {
+            const debugInfo = document.getElementById('debug-info');
+            const calendarContainer = document.getElementById('calendar-container');
+            
+            let debugMessages = [];
+            
+            // Test 1: Check if DOM is ready
+            debugMessages.push('<div class="info">DOM is ready</div>');
+            
+            // Test 2: Load CSS
+            const cssLink = document.createElement('link');
+            cssLink.rel = 'stylesheet';
+            cssLink.href = 'styles.css';
+            document.head.appendChild(cssLink);
+            debugMessages.push('<div class="success">CSS loaded</div>');
+            
+            // Test 3: Load Font Awesome
+            const faLink = document.createElement('link');
+            faLink.rel = 'stylesheet';
+            faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+            document.head.appendChild(faLink);
+            debugMessages.push('<div class="success">Font Awesome loaded</div>');
+            
+            // Test 4: Load HTML structure
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    // Extract the body content
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const bodyContent = doc.body.innerHTML;
+                    
+                    calendarContainer.innerHTML = bodyContent;
+                    debugMessages.push('<div class="success">HTML structure loaded</div>');
+                    
+                    // Test 5: Load and execute JavaScript
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    script.onload = function() {
+                        debugMessages.push('<div class="success">JavaScript loaded</div>');
+                        
+                        // Wait a bit for initialization
+                        setTimeout(() => {
+                            // Test 6: Check if calendar is initialized
+                            if (typeof calendar !== 'undefined' && calendar !== null) {
+                                debugMessages.push('<div class="success">Calendar instance created</div>');
+                                
+                                // Test 7: Check if month view is visible
+                                const monthView = document.getElementById('monthView');
+                                if (monthView && monthView.classList.contains('active')) {
+                                    debugMessages.push('<div class="success">Month view is active</div>');
+                                } else {
+                                    debugMessages.push('<div class="error">Month view is not active</div>');
+                                }
+                                
+                                // Test 8: Check if calendar grid has content
+                                const monthGrid = document.getElementById('monthGrid');
+                                if (monthGrid && monthGrid.children.length > 0) {
+                                    debugMessages.push('<div class="success">Month grid has ' + monthGrid.children.length + ' elements</div>');
+                                } else {
+                                    debugMessages.push('<div class="error">Month grid is empty</div>');
+                                }
+                            } else {
+                                debugMessages.push('<div class="error">Calendar instance not created</div>');
+                            }
+                            
+                            debugInfo.innerHTML = debugMessages.join('');
+                        }, 1000);
+                    };
+                    script.onerror = function() {
+                        debugMessages.push('<div class="error">Failed to load JavaScript</div>');
+                        debugInfo.innerHTML = debugMessages.join('');
+                    };
+                    document.head.appendChild(script);
+                })
+                .catch(error => {
+                    debugMessages.push('<div class="error">Failed to load HTML: ' + error.message + '</div>');
+                    debugInfo.innerHTML = debugMessages.join('');
+                });
+        }
+        
+        // Start loading when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadCalendar);
+        } else {
+            loadCalendar();
+        }
+    </script>
+</body>
+</html>

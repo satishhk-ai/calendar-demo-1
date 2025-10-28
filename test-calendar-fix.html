@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Fix Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .test-panel {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .success { background: #d4edda; color: #155724; border-left-color: #28a745; }
+        .error { background: #f8d7da; color: #721c24; border-left-color: #dc3545; }
+        .warning { background: #fff3cd; color: #856404; border-left-color: #ffc107; }
+        .info { background: #d1ecf1; color: #0c5460; border-left-color: #17a2b8; }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #0056b3; }
+        .calendar-test {
+            border: 2px solid #ddd;
+            min-height: 400px;
+            padding: 20px;
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Calendar Fix Test</h1>
+    
+    <div class="test-panel">
+        <h3>Step 1: Test Simple Calendar (Should Work)</h3>
+        <div class="calendar-test" id="simple-calendar-container">
+            <p>Loading simple calendar...</p>
+        </div>
+        <button class="btn" onclick="loadSimpleCalendar()">Load Simple Calendar</button>
+    </div>
+    
+    <div class="test-panel">
+        <h3>Step 2: Test Original Calendar (With Fixes)</h3>
+        <div class="calendar-test" id="original-calendar-container">
+            <p>Loading original calendar...</p>
+        </div>
+        <button class="btn" onclick="loadOriginalCalendar()">Load Original Calendar</button>
+        <button class="btn" onclick="applyFixes()">Apply Fixes</button>
+    </div>
+    
+    <div class="test-panel">
+        <h3>Step 3: Diagnostic Results</h3>
+        <div id="diagnostic-results">Click "Run Diagnostics" to see results...</div>
+        <button class="btn" onclick="runDiagnostics()">Run Diagnostics</button>
+    </div>
+    
+    <div class="test-panel">
+        <h3>Step 4: Fix Results</h3>
+        <div id="fix-results">No fixes applied yet...</div>
+    </div>
+
+    <script>
+        function loadSimpleCalendar() {
+            const container = document.getElementById('simple-calendar-container');
+            container.innerHTML = '<iframe src="simple-calendar.html" width="100%" height="400" style="border: none;"></iframe>';
+        }
+        
+        function loadOriginalCalendar() {
+            const container = document.getElementById('original-calendar-container');
+            
+            // Load the original calendar HTML
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const bodyContent = doc.body.innerHTML;
+                    
+                    container.innerHTML = bodyContent;
+                    
+                    // Load CSS
+                    const cssLink = document.createElement('link');
+                    cssLink.rel = 'stylesheet';
+                    cssLink.href = 'styles.css';
+                    document.head.appendChild(cssLink);
+                    
+                    // Load Font Awesome
+                    const faLink = document.createElement('link');
+                    faLink.rel = 'stylesheet';
+                    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                    document.head.appendChild(faLink);
+                    
+                    // Load JavaScript
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    script.onload = function() {
+                        addResult('diagnostic-results', '✅ Original calendar JavaScript loaded', 'success');
+                        // Apply fixes immediately
+                        setTimeout(applyFixes, 1000);
+                    };
+                    script.onerror = function() {
+                        addResult('diagnostic-results', '❌ Failed to load original calendar JavaScript', 'error');
+                    };
+                    document.head.appendChild(script);
+                })
+                .catch(error => {
+                    addResult('diagnostic-results', '❌ Failed to load original calendar HTML: ' + error.message, 'error');
+                });
+        }
+        
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.innerHTML = message;
+            container.appendChild(resultDiv);
+        }
+        
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+        
+        function runDiagnostics() {
+            clearResults('diagnostic-results');
+            
+            // Check 1: DOM elements
+            const requiredElements = [
+                'monthView', 'monthGrid', 'currentDate', 'prevBtn', 'nextBtn'
+            ];
+            
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    addResult('diagnostic-results', `✅ Element #${id} found`, 'success');
+                } else {
+                    addResult('diagnostic-results', `❌ Element #${id} missing`, 'error');
+                }
+            });
+            
+            // Check 2: Calendar class
+            if (typeof MyCalendar !== 'undefined') {
+                addResult('diagnostic-results', '✅ MyCalendar class defined', 'success');
+            } else {
+                addResult('diagnostic-results', '❌ MyCalendar class not defined', 'error');
+            }
+            
+            // Check 3: Calendar instance
+            if (typeof calendar !== 'undefined' && calendar !== null) {
+                addResult('diagnostic-results', '✅ Calendar instance created', 'success');
+            } else {
+                addResult('diagnostic-results', '❌ Calendar instance not created', 'error');
+            }
+            
+            // Check 4: Month view visibility
+            const monthView = document.getElementById('monthView');
+            if (monthView) {
+                const computedStyle = window.getComputedStyle(monthView);
+                addResult('diagnostic-results', `ℹ️ Month view display: ${computedStyle.display}`, 'info');
+                addResult('diagnostic-results', `ℹ️ Month view classes: ${monthView.className}`, 'info');
+            }
+            
+            // Check 5: Month grid content
+            const monthGrid = document.getElementById('monthGrid');
+            if (monthGrid) {
+                addResult('diagnostic-results', `ℹ️ Month grid children: ${monthGrid.children.length}`, 'info');
+            }
+        }
+        
+        function applyFixes() {
+            clearResults('fix-results');
+            
+            const fixes = [];
+            
+            // Fix 1: Ensure month view is active
+            const monthView = document.getElementById('monthView');
+            if (monthView) {
+                // Remove active from all views
+                document.querySelectorAll('.calendar-view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                // Add active to month view
+                monthView.classList.add('active');
+                fixes.push('✅ Set month view as active');
+            }
+            
+            // Fix 2: Force visibility
+            if (monthView) {
+                const computedStyle = window.getComputedStyle(monthView);
+                if (computedStyle.display === 'none') {
+                    monthView.style.display = 'block';
+                    fixes.push('✅ Forced month view visibility');
+                }
+            }
+            
+            // Fix 3: Force calendar rendering
+            if (typeof calendar !== 'undefined' && calendar !== null) {
+                try {
+                    calendar.renderCurrentView();
+                    fixes.push('✅ Forced calendar re-render');
+                } catch (e) {
+                    fixes.push('❌ Failed to re-render: ' + e.message);
+                }
+            }
+            
+            // Fix 4: Create minimal content if needed
+            const monthGrid = document.getElementById('monthGrid');
+            if (monthGrid && monthGrid.children.length === 0) {
+                // Add day headers
+                const dayHeaders = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+                dayHeaders.forEach(day => {
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'day-header';
+                    dayHeader.textContent = day;
+                    monthGrid.appendChild(dayHeader);
+                });
+                
+                // Add some day cells
+                for (let i = 1; i <= 35; i++) {
+                    const dayCell = document.createElement('div');
+                    dayCell.className = 'day-cell';
+                    dayCell.innerHTML = '<div class="day-number">' + i + '</div>';
+                    monthGrid.appendChild(dayCell);
+                }
+                
+                fixes.push('✅ Created minimal calendar content');
+            }
+            
+            // Display results
+            fixes.forEach(fix => addResult('fix-results', fix, fix.startsWith('✅') ? 'success' : 'error'));
+        }
+        
+        // Auto-load simple calendar
+        window.addEventListener('load', function() {
+            setTimeout(loadSimpleCalendar, 500);
+        });
+    </script>
+</body>
+</html>

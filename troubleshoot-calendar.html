@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Troubleshooter</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background: #f5f5f5;
+        }
+        .troubleshoot-panel {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .success { 
+            background: #d4edda; 
+            color: #155724; 
+            border-left-color: #28a745;
+        }
+        .error { 
+            background: #f8d7da; 
+            color: #721c24; 
+            border-left-color: #dc3545;
+        }
+        .warning { 
+            background: #fff3cd; 
+            color: #856404; 
+            border-left-color: #ffc107;
+        }
+        .info { 
+            background: #d1ecf1; 
+            color: #0c5460; 
+            border-left-color: #17a2b8;
+        }
+        .calendar-test {
+            border: 2px solid #ddd;
+            min-height: 400px;
+            padding: 20px;
+            background: white;
+        }
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover {
+            background: #0056b3;
+        }
+        .btn-success {
+            background: #28a745;
+        }
+        .btn-danger {
+            background: #dc3545;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Calendar Troubleshooter</h1>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 1: Basic Checks</h3>
+        <div id="basic-checks">Running basic checks...</div>
+        <button class="btn" onclick="runBasicChecks()">Re-run Basic Checks</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 2: File Loading</h3>
+        <div id="file-checks">Checking files...</div>
+        <button class="btn" onclick="checkFiles()">Check Files</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 3: DOM Structure</h3>
+        <div id="dom-checks">Checking DOM...</div>
+        <button class="btn" onclick="checkDOM()">Check DOM</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 4: JavaScript Execution</h3>
+        <div id="js-checks">Checking JavaScript...</div>
+        <button class="btn" onclick="checkJavaScript()">Check JavaScript</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 5: Calendar Rendering</h3>
+        <div id="calendar-checks">Checking calendar rendering...</div>
+        <button class="btn" onclick="checkCalendarRendering()">Check Calendar</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 6: Live Calendar Test</h3>
+        <div class="calendar-test" id="calendar-container">
+            <p>Calendar will appear here after fixing issues...</p>
+        </div>
+        <button class="btn btn-success" onclick="loadLiveCalendar()">Load Live Calendar</button>
+        <button class="btn btn-danger" onclick="clearCalendar()">Clear Calendar</button>
+    </div>
+    
+    <div class="troubleshoot-panel">
+        <h3>Step 7: Fixes Applied</h3>
+        <div id="fixes-applied">No fixes applied yet...</div>
+        <button class="btn" onclick="applyFixes()">Apply Auto-Fixes</button>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        function addResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `status ${type}`;
+            resultDiv.innerHTML = message;
+            container.appendChild(resultDiv);
+        }
+        
+        function clearResults(containerId) {
+            document.getElementById(containerId).innerHTML = '';
+        }
+        
+        function runBasicChecks() {
+            clearResults('basic-checks');
+            
+            // Check 1: Browser support
+            if (typeof fetch !== 'undefined') {
+                addResult('basic-checks', '✅ Fetch API is supported', 'success');
+            } else {
+                addResult('basic-checks', '❌ Fetch API not supported - use modern browser', 'error');
+            }
+            
+            // Check 2: Console availability
+            if (typeof console !== 'undefined') {
+                addResult('basic-checks', '✅ Console is available for debugging', 'success');
+            } else {
+                addResult('basic-checks', '❌ Console not available', 'error');
+            }
+            
+            // Check 3: DOM ready
+            if (document.readyState === 'complete') {
+                addResult('basic-checks', '✅ DOM is fully loaded', 'success');
+            } else {
+                addResult('basic-checks', '⚠️ DOM still loading: ' + document.readyState, 'warning');
+            }
+            
+            // Check 4: Local storage
+            try {
+                localStorage.setItem('test', 'test');
+                localStorage.removeItem('test');
+                addResult('basic-checks', '✅ Local storage is available', 'success');
+            } catch (e) {
+                addResult('basic-checks', '❌ Local storage not available: ' + e.message, 'error');
+            }
+        }
+        
+        function checkFiles() {
+            clearResults('file-checks');
+            
+            const files = ['index.html', 'styles.css', 'script.js'];
+            
+            files.forEach(file => {
+                fetch(file)
+                    .then(response => {
+                        if (response.ok) {
+                            addResult('file-checks', `✅ ${file} - Status: ${response.status}`, 'success');
+                        } else {
+                            addResult('file-checks', `❌ ${file} - Status: ${response.status}`, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        addResult('file-checks', `❌ ${file} - Error: ${error.message}`, 'error');
+                    });
+            });
+        }
+        
+        function checkDOM() {
+            clearResults('dom-checks');
+            
+            const requiredElements = [
+                'monthView', 'weekView', 'dayView', 'agendaView', 'yearView',
+                'monthGrid', 'weekGrid', 'dayGrid', 'agendaList', 'yearGrid',
+                'currentDate', 'prevBtn', 'nextBtn'
+            ];
+            
+            requiredElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    addResult('dom-checks', `✅ Element #${id} found`, 'success');
+                } else {
+                    addResult('dom-checks', `❌ Element #${id} missing`, 'error');
+                }
+            });
+        }
+        
+        function checkJavaScript() {
+            clearResults('js-checks');
+            
+            // Check if MyCalendar class exists
+            if (typeof MyCalendar !== 'undefined') {
+                addResult('js-checks', '✅ MyCalendar class is defined', 'success');
+            } else {
+                addResult('js-checks', '❌ MyCalendar class not found', 'error');
+            }
+            
+            // Check if calendar instance exists
+            if (typeof calendar !== 'undefined' && calendar !== null) {
+                addResult('js-checks', '✅ Calendar instance created', 'success');
+                
+                // Check calendar properties
+                if (calendar.currentView) {
+                    addResult('js-checks', `✅ Current view: ${calendar.currentView}`, 'success');
+                } else {
+                    addResult('js-checks', '❌ Current view not set', 'error');
+                }
+                
+                if (calendar.currentDate) {
+                    addResult('js-checks', `✅ Current date: ${calendar.currentDate}`, 'success');
+                } else {
+                    addResult('js-checks', '❌ Current date not set', 'error');
+                }
+            } else {
+                addResult('js-checks', '❌ Calendar instance not created', 'error');
+            }
+        }
+        
+        function checkCalendarRendering() {
+            clearResults('calendar-checks');
+            
+            // Check if month view is active
+            const monthView = document.getElementById('monthView');
+            if (monthView) {
+                if (monthView.classList.contains('active')) {
+                    addResult('calendar-checks', '✅ Month view is active', 'success');
+                } else {
+                    addResult('calendar-checks', '❌ Month view is not active', 'error');
+                }
+            } else {
+                addResult('calendar-checks', '❌ Month view element not found', 'error');
+            }
+            
+            // Check if month grid has content
+            const monthGrid = document.getElementById('monthGrid');
+            if (monthGrid) {
+                const childCount = monthGrid.children.length;
+                if (childCount > 0) {
+                    addResult('calendar-checks', `✅ Month grid has ${childCount} elements`, 'success');
+                } else {
+                    addResult('calendar-checks', '❌ Month grid is empty', 'error');
+                }
+            } else {
+                addResult('calendar-checks', '❌ Month grid element not found', 'error');
+            }
+            
+            // Check CSS visibility
+            if (monthView) {
+                const computedStyle = window.getComputedStyle(monthView);
+                const display = computedStyle.display;
+                if (display === 'block') {
+                    addResult('calendar-checks', '✅ Month view is visible (display: block)', 'success');
+                } else {
+                    addResult('calendar-checks', `❌ Month view is hidden (display: ${display})`, 'error');
+                }
+            }
+        }
+        
+        function loadLiveCalendar() {
+            const container = document.getElementById('calendar-container');
+            container.innerHTML = '<p>Loading calendar...</p>';
+            
+            // Load the calendar HTML
+            fetch('index.html')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const bodyContent = doc.body.innerHTML;
+                    
+                    container.innerHTML = bodyContent;
+                    
+                    // Load CSS
+                    const cssLink = document.createElement('link');
+                    cssLink.rel = 'stylesheet';
+                    cssLink.href = 'styles.css';
+                    document.head.appendChild(cssLink);
+                    
+                    // Load Font Awesome
+                    const faLink = document.createElement('link');
+                    faLink.rel = 'stylesheet';
+                    faLink.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css';
+                    document.head.appendChild(faLink);
+                    
+                    // Load and execute JavaScript
+                    const script = document.createElement('script');
+                    script.src = 'script.js';
+                    script.onload = function() {
+                        addResult('calendar-checks', '✅ Calendar loaded successfully', 'success');
+                        
+                        // Wait for initialization
+                        setTimeout(() => {
+                            checkCalendarRendering();
+                        }, 1000);
+                    };
+                    script.onerror = function() {
+                        addResult('calendar-checks', '❌ Failed to load JavaScript', 'error');
+                    };
+                    document.head.appendChild(script);
+                })
+                .catch(error => {
+                    addResult('calendar-checks', '❌ Failed to load HTML: ' + error.message, 'error');
+                });
+        }
+        
+        function clearCalendar() {
+            document.getElementById('calendar-container').innerHTML = '<p>Calendar cleared...</p>';
+        }
+        
+        function applyFixes() {
+            clearResults('fixes-applied');
+            
+            // Fix 1: Ensure month view is active
+            const monthView = document.getElementById('monthView');
+            if (monthView) {
+                // Remove active from all views
+                document.querySelectorAll('.calendar-view').forEach(view => {
+                    view.classList.remove('active');
+                });
+                // Add active to month view
+                monthView.classList.add('active');
+                addResult('fixes-applied', '✅ Fixed: Set month view as active', 'success');
+            }
+            
+            // Fix 2: Force calendar rendering if calendar exists
+            if (typeof calendar !== 'undefined' && calendar !== null) {
+                try {
+                    calendar.renderCurrentView();
+                    addResult('fixes-applied', '✅ Fixed: Forced calendar re-render', 'success');
+                } catch (e) {
+                    addResult('fixes-applied', '❌ Failed to re-render calendar: ' + e.message, 'error');
+                }
+            }
+            
+            // Fix 3: Check and fix CSS
+            const monthViewElement = document.getElementById('monthView');
+            if (monthViewElement) {
+                const computedStyle = window.getComputedStyle(monthViewElement);
+                if (computedStyle.display === 'none') {
+                    monthViewElement.style.display = 'block';
+                    addResult('fixes-applied', '✅ Fixed: Forced month view to be visible', 'success');
+                }
+            }
+        }
+        
+        // Run initial checks
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                runBasicChecks();
+                checkFiles();
+                checkDOM();
+                checkJavaScript();
+                checkCalendarRendering();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

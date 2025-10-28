@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Calendar - Browser Compatible</title>
+    <link rel="stylesheet" href="styles-browser-compatible.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Fallback for older browsers -->
+    <script>
+        // Browser compatibility check
+        if (!window.console) {
+            window.console = {
+                log: function() {},
+                error: function() {},
+                warn: function() {}
+            };
+        }
+        
+        // Polyfill for older browsers
+        if (!Array.prototype.forEach) {
+            Array.prototype.forEach = function(callback, thisArg) {
+                for (var i = 0; i < this.length; i++) {
+                    callback.call(thisArg, this[i], i, this);
+                }
+            };
+        }
+        
+        if (!Array.prototype.filter) {
+            Array.prototype.filter = function(callback, thisArg) {
+                var result = [];
+                for (var i = 0; i < this.length; i++) {
+                    if (callback.call(thisArg, this[i], i, this)) {
+                        result.push(this[i]);
+                    }
+                }
+                return result;
+            };
+        }
+        
+        if (!Array.prototype.map) {
+            Array.prototype.map = function(callback, thisArg) {
+                var result = [];
+                for (var i = 0; i < this.length; i++) {
+                    result.push(callback.call(thisArg, this[i], i, this));
+                }
+                return result;
+            };
+        }
+        
+        if (!Array.prototype.indexOf) {
+            Array.prototype.indexOf = function(searchElement, fromIndex) {
+                var k = fromIndex || 0;
+                var length = this.length;
+                for (var i = k; i < length; i++) {
+                    if (this[i] === searchElement) {
+                        return i;
+                    }
+                }
+                return -1;
+            };
+        }
+        
+        if (!String.prototype.trim) {
+            String.prototype.trim = function() {
+                return this.replace(/^\s+|\s+$/g, '');
+            };
+        }
+        
+        if (!Date.prototype.toISOString) {
+            Date.prototype.toISOString = function() {
+                function pad(n) { return n < 10 ? '0' + n : n; }
+                return this.getUTCFullYear() + '-' +
+                       pad(this.getUTCMonth() + 1) + '-' +
+                       pad(this.getUTCDate()) + 'T' +
+                       pad(this.getUTCHours()) + ':' +
+                       pad(this.getUTCMinutes()) + ':' +
+                       pad(this.getUTCSeconds()) + '.' +
+                       (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) + 'Z';
+            };
+        }
+        
+        if (!Date.prototype.toLocaleDateString) {
+            Date.prototype.toLocaleDateString = function() {
+                var months = ['January', 'February', 'March', 'April', 'May', 'June',
+                             'July', 'August', 'September', 'October', 'November', 'December'];
+                return months[this.getMonth()] + ' ' + this.getDate() + ', ' + this.getFullYear();
+            };
+        }
+        
+        if (!Date.prototype.toLocaleTimeString) {
+            Date.prototype.toLocaleTimeString = function() {
+                var hours = this.getHours();
+                var minutes = this.getMinutes();
+                var ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12;
+                hours = hours ? hours : 12;
+                minutes = minutes < 10 ? '0' + minutes : minutes;
+                return hours + ':' + minutes + ' ' + ampm;
+            };
+        }
+        
+        if (!JSON) {
+            window.JSON = {
+                parse: function(str) {
+                    return eval('(' + str + ')');
+                },
+                stringify: function(obj) {
+                    if (obj === null) return 'null';
+                    if (typeof obj === 'undefined') return undefined;
+                    if (typeof obj === 'boolean') return obj.toString();
+                    if (typeof obj === 'number') return obj.toString();
+                    if (typeof obj === 'string') return '"' + obj.replace(/"/g, '\\"') + '"';
+                    if (obj instanceof Array) {
+                        var arr = [];
+                        for (var i = 0; i < obj.length; i++) {
+                            arr.push(JSON.stringify(obj[i]));
+                        }
+                        return '[' + arr.join(',') + ']';
+                    }
+                    if (typeof obj === 'object') {
+                        var pairs = [];
+                        for (var key in obj) {
+                            if (obj.hasOwnProperty(key)) {
+                                pairs.push('"' + key + '":' + JSON.stringify(obj[key]));
+                            }
+                        }
+                        return '{' + pairs.join(',') + '}';
+                    }
+                    return '{}';
+                }
+            };
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-calendar-alt"></i> My Calendar</h1>
+            
+            <!-- Controls -->
+            <div class="controls">
+                <!-- View Selector -->
+                <div class="view-selector">
+                    <button id="monthViewBtn" class="view-btn active">
+                        <i class="fas fa-calendar"></i> Month
+                    </button>
+                    <button id="weekViewBtn" class="view-btn">
+                        <i class="fas fa-calendar-week"></i> Week
+                    </button>
+                    <button id="dayViewBtn" class="view-btn">
+                        <i class="fas fa-calendar-day"></i> Day
+                    </button>
+                    <button id="agendaViewBtn" class="view-btn">
+                        <i class="fas fa-list"></i> Agenda
+                    </button>
+                    <button id="yearViewBtn" class="view-btn">
+                        <i class="fas fa-calendar-alt"></i> Year
+                    </button>
+                </div>
+                
+                <!-- Action Buttons -->
+                <button id="addTaskBtn" class="btn">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+                <button id="viewRemindersBtn" class="btn">
+                    <i class="fas fa-bell"></i> View Reminders
+                </button>
+                <button id="settingsBtn" class="btn">
+                    <i class="fas fa-cog"></i> Settings
+                </button>
+            </div>
+        </div>
+
+        <!-- Calendar Container -->
+        <div class="calendar-container">
+            <!-- Calendar Header -->
+            <div class="calendar-header">
+                <button id="prevBtn" class="nav-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 id="currentDate">January 2024</h2>
+                <button id="nextBtn" class="nav-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <!-- Calendar Views -->
+            <!-- Month View -->
+            <div id="monthView" class="calendar-view active">
+                <div class="calendar-grid" id="monthGrid">
+                    <!-- Calendar will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Week View -->
+            <div id="weekView" class="calendar-view">
+                <div class="calendar-grid" id="weekGrid">
+                    <!-- Week calendar will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Day View -->
+            <div id="dayView" class="calendar-view">
+                <div id="dayGrid">
+                    <!-- Day calendar will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Agenda View -->
+            <div id="agendaView" class="calendar-view">
+                <div id="agendaGrid">
+                    <!-- Agenda will be generated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Year View -->
+            <div id="yearView" class="calendar-view">
+                <div class="year-grid" id="yearGrid">
+                    <!-- Year calendar will be generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Add New Task</h3>
+            <form id="taskForm">
+                <div class="form-group">
+                    <label for="taskTitle">Task Title *</label>
+                    <input type="text" id="taskTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="taskDescription">Description</label>
+                    <textarea id="taskDescription" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="enableReminder" checked>
+                        <label for="enableReminder">Enable 24-hour reminder</label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Reminders Modal -->
+    <div id="remindersModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Upcoming Reminders</h3>
+            <div id="remindersList">
+                <!-- Reminders will be generated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Settings</h3>
+            <div class="form-group">
+                <label for="defaultReminderHours">Default Reminder Hours</label>
+                <select id="defaultReminderHours">
+                    <option value="1">1 hour</option>
+                    <option value="2">2 hours</option>
+                    <option value="6">6 hours</option>
+                    <option value="12">12 hours</option>
+                    <option value="24" selected>24 hours</option>
+                    <option value="48">48 hours</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="globalDoNotDisturb">
+                    <label for="globalDoNotDisturb">Global Do Not Disturb</label>
+                </div>
+            </div>
+            <button onclick="calendar.saveSettings(); this.closest('.modal').style.display='none';" class="btn btn-primary">Save Settings</button>
+        </div>
+    </div>
+
+    <!-- Task Details Modal -->
+    <div id="taskDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Task Details</h3>
+            <div class="form-group">
+                <label>Title</label>
+                <div id="taskDetailsTitle"></div>
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <div id="taskDetailsDescription"></div>
+            </div>
+            <div class="form-group">
+                <label>Date</label>
+                <div id="taskDetailsDate"></div>
+            </div>
+            <button id="deleteTaskBtn" class="btn btn-danger">Delete Task</button>
+        </div>
+    </div>
+
+    <!-- Load the browser-compatible script -->
+    <script src="script-browser-compatible.js"></script>
+    
+    <!-- Fallback script for very old browsers -->
+    <script>
+        // Fallback initialization for very old browsers
+        if (typeof MyCalendar === 'undefined') {
+            console.warn('MyCalendar not loaded, using fallback');
+            
+            // Simple fallback calendar
+            function createFallbackCalendar() {
+                var container = document.getElementById('monthGrid');
+                if (container) {
+                    container.innerHTML = '<div style="text-align: center; padding: 50px; color: #666;">Calendar loading... Please refresh the page.</div>';
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', createFallbackCalendar);
+            } else {
+                createFallbackCalendar();
+            }
+        }
+    </script>
+</body>
+</html>

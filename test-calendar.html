@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-info { background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e8; color: #2e7d32; }
+    </style>
+</head>
+<body>
+    <h1>Calendar Test Page</h1>
+    <div class="test-info">
+        <h3>Test Results:</h3>
+        <div id="test-results">Running tests...</div>
+    </div>
+    
+    <h2>Calendar App:</h2>
+    <iframe src="index.html" width="100%" height="600" style="border: 1px solid #ccc;"></iframe>
+
+    <script>
+        function runTests() {
+            const results = document.getElementById('test-results');
+            let testResults = [];
+            
+            // Test 1: Check if calendar class exists
+            try {
+                if (typeof MyCalendar !== 'undefined') {
+                    testResults.push('<div class="success">✓ MyCalendar class is defined</div>');
+                } else {
+                    testResults.push('<div class="error">✗ MyCalendar class is not defined</div>');
+                }
+            } catch (e) {
+                testResults.push('<div class="error">✗ Error checking MyCalendar class: ' + e.message + '</div>');
+            }
+            
+            // Test 2: Check if calendar instance exists
+            try {
+                if (typeof calendar !== 'undefined' && calendar !== null) {
+                    testResults.push('<div class="success">✓ Calendar instance is created</div>');
+                } else {
+                    testResults.push('<div class="error">✗ Calendar instance is not created</div>');
+                }
+            } catch (e) {
+                testResults.push('<div class="error">✗ Error checking calendar instance: ' + e.message + '</div>');
+            }
+            
+            // Test 3: Check if month view is visible
+            try {
+                const monthView = document.querySelector('#monthView');
+                if (monthView && monthView.classList.contains('active')) {
+                    testResults.push('<div class="success">✓ Month view is active</div>');
+                } else {
+                    testResults.push('<div class="error">✗ Month view is not active</div>');
+                }
+            } catch (e) {
+                testResults.push('<div class="error">✗ Error checking month view: ' + e.message + '</div>');
+            }
+            
+            // Test 4: Check if calendar grid has content
+            try {
+                const monthGrid = document.querySelector('#monthGrid');
+                if (monthGrid && monthGrid.children.length > 0) {
+                    testResults.push('<div class="success">✓ Month grid has content (' + monthGrid.children.length + ' elements)</div>');
+                } else {
+                    testResults.push('<div class="error">✗ Month grid is empty</div>');
+                }
+            } catch (e) {
+                testResults.push('<div class="error">✗ Error checking month grid: ' + e.message + '</div>');
+            }
+            
+            results.innerHTML = testResults.join('');
+        }
+        
+        // Run tests after a short delay to allow calendar to initialize
+        setTimeout(runTests, 1000);
+    </script>
+</body>
+</html>

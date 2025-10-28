@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Calendar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-calendar-alt"></i> My Calendar</h1>
+            <div class="header-controls">
+                <div class="view-selector">
+                    <button class="view-btn active" data-view="month">
+                        <i class="fas fa-calendar"></i> Month
+                    </button>
+                    <button class="view-btn" data-view="week">
+                        <i class="fas fa-calendar-week"></i> Week
+                    </button>
+                    <button class="view-btn" data-view="workweek">
+                        <i class="fas fa-briefcase"></i> Work Week
+                    </button>
+                    <button class="view-btn" data-view="day">
+                        <i class="fas fa-calendar-day"></i> Day
+                    </button>
+                    <button class="view-btn" data-view="agenda">
+                        <i class="fas fa-list"></i> Agenda
+                    </button>
+                    <button class="view-btn" data-view="year">
+                        <i class="fas fa-calendar-alt"></i> Year
+                    </button>
+                </div>
+                <div class="control-buttons">
+                    <button id="addTaskBtn" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Add Event
+                    </button>
+                    <button id="viewRemindersBtn" class="btn btn-secondary">
+                        <i class="fas fa-bell"></i> Reminders
+                    </button>
+                    <button id="settingsBtn" class="btn btn-secondary">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <button id="prevBtn" class="nav-btn">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 id="currentDate">December 2024</h2>
+                <button id="nextBtn" class="nav-btn">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+
+            <div class="calendar-content">
+                <div id="monthView" class="calendar-view active">
+                    <div class="calendar-grid" id="monthGrid">
+                        <!-- Month view will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="weekView" class="calendar-view">
+                    <div class="week-grid" id="weekGrid">
+                        <!-- Week view will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="workweekView" class="calendar-view">
+                    <div class="workweek-grid" id="workweekGrid">
+                        <!-- Work week view will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="dayView" class="calendar-view">
+                    <div class="day-grid" id="dayGrid">
+                        <!-- Day view will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="agendaView" class="calendar-view">
+                    <div class="agenda-list" id="agendaList">
+                        <!-- Agenda view will be generated here -->
+                    </div>
+                </div>
+                
+                <div id="yearView" class="calendar-view">
+                    <div class="year-grid" id="yearGrid">
+                        <!-- Year view will be generated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Modal -->
+        <div id="taskModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Add New Event</h3>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label for="taskTitle">Event Title:</label>
+                        <input type="text" id="taskTitle" maxlength="200" required>
+                        <small class="char-count">0/200 characters</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDescription">Description:</label>
+                        <textarea id="taskDescription" rows="3" maxlength="500"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskIcon">Event Icon:</label>
+                        <select id="taskIcon">
+                            <option value="fas fa-calendar">General</option>
+                            echo "# calendar-demo-1" >> README.md               <option value="fas fa-utensils">Lunch</option>
+                            <option value="fas fa-book">Study</option>
+                            <option value="fas fa-briefcase">Work</option>
+                            <option value="fas fa-heart">Health</option>
+                            <option value="fas fa-plane">Travel</option>
+                            <option value="fas fa-home">Home</option>
+                            <option value="fas fa-users">Meeting</option>
+                            <option value="fas fa-dumbbell">Exercise</option>
+                            <option value="fas fa-shopping-cart">Shopping</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDate">Date:</label>
+                        <input type="date" id="taskDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskTime">Time:</label>
+                        <input type="time" id="taskTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="taskDuration">Duration (hours):</label>
+                        <input type="number" id="taskDuration" min="0.5" max="24" step="0.5" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="enableReminder" checked>
+                            Enable 24-hour reminder
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="doNotDisturb">
+                            Do Not Disturb (silent reminder)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Event</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Settings</h3>
+                <div class="settings-content">
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="globalDoNotDisturb">
+                            Global Do Not Disturb
+                        </label>
+                        <p>Disable all reminder sounds and notifications</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="showWeekends">
+                            Show Weekends
+                        </label>
+                        <p>Include Saturday and Sunday in work week view</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="startOnMonday">
+                            Start Week on Monday
+                        </label>
+                        <p>Start the week on Monday instead of Sunday</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reminders Modal -->
+        <div id="remindersModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Upcoming Reminders</h3>
+                <div id="remindersList">
+                    <!-- Reminders will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Details Modal -->
+        <div id="taskDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3>Event Details</h3>
+                <div id="taskDetails">
+                    <!-- Task details will be populated here -->
+                </div>
+                <div class="modal-actions">
+                    <button id="editTaskBtn" class="btn btn-secondary">Edit</button>
+                    <button id="deleteTaskBtn" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Task Hover Tooltip -->
+        <div id="taskTooltip" class="task-tooltip">
+            <div class="tooltip-content"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
